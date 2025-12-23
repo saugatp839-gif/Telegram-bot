@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Bot User Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0088cc;
+            --secondary-color: #54a3d8;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --dark-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-color);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            z-index: 1000;
+            transition: all 0.3s;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-radius: 0;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: var(--secondary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: none;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 20px;
+            font-weight: 600;
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .login-card .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .login-card .logo i {
+            font-size: 3rem;
+            color: var(--primary-color);
+        }
+
+        .login-card .alert {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .toggle-sidebar {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .toggle-sidebar {
+                display: block;
+            }
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            background-color: #28a745;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background-color: #dc3545;
+        }
+
+        .notification.warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.available {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .task-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+
+        .task-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-card h5 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .task-card .reward {
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        .referral-box {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .referral-link {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            word-break: break-all;
+            font-family: monospace;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .withdrawal-method {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .withdrawal-method:hover {
+            background-color: #f8f9fa;
+        }
+
+        .withdrawal-method.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(0, 136, 204, 0.1);
+        }
+
+        .start-wizard {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .wizard-step {
+            display: none;
+        }
+
+        .wizard-step.active {
+            display: block;
+        }
+
+        .wizard-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #e0e0e0;
+            z-index: -1;
+        }
+
+        .progress-step:first-child::before {
+            left: 50%;
+        }
+
+        .progress-step:last-child::before {
+            right: 50%;
+        }
+
+        .progress-step.active::before {
+            background-color: var(--primary-color);
+        }
+
+        .progress-step .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            color: #6c757d;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .progress-step.active .step-number {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .progress-step.completed .step-number {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .language-selector {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login/Register Page -->
+    <div id="authPage" class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <i class="bi bi-robot"></i>
+            </div>
+            <h2 id="authTitle">Login</h2>
+            
+            <div class="alert alert-danger" id="authError">
+                <i class="bi bi-exclamation-triangle"></i> <span id="authErrorText">Authentication failed</span>
+            </div>
+            
+            <form id="authForm">
+                <div class="form-group mb-3">
+                    <label for="telegramId">Telegram ID</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="telegramId" required>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="username">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-at"></i></span>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                </div>
+                <div id="passwordField" class="form-group mb-3" style="display: none;">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="password">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">
+                        Remember me
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="authBtn">
+                    <span class="btn-text">Login</span>
+                    <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+            </form>
+            
+            <div class="text-center mt-3">
+                <p id="authToggleText">Don't have an account? <a href="#" id="authToggle">Register</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Wizard -->
+    <div id="startWizard" class="login-container" style="display: none;">
+        <div class="login-card start-wizard">
+            <div class="logo">
+                <i class="bi bi-robot"></i>
+            </div>
+            <h2>Welcome to Telegram Bot</h2>
+            
+            <div class="wizard-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div>Welcome</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div>Referral</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div>Complete</div>
+                </div>
+            </div>
+            
+            <!-- Step 1: Welcome -->
+            <div class="wizard-step active" data-step="1">
+                <h4>Welcome!</h4>
+                <p>Thank you for joining our Telegram Bot! Here's how you can earn rewards:</p>
+                <ul>
+                    <li>Complete tasks to earn rewards</li>
+                    <li>Refer friends to earn bonus rewards</li>
+                    <li>Withdraw your earnings when you reach the minimum threshold</li>
+                </ul>
+                <p>Let's get started by setting up your account.</p>
+                <button class="btn btn-primary w-100" onclick="nextWizardStep()">Next</button>
+            </div>
+            
+            <!-- Step 2: Referral -->
+            <div class="wizard-step" data-step="2">
+                <h4>Referral System</h4>
+                <p>Invite friends using your referral link and earn rewards when they join and complete tasks!</p>
+                <div class="referral-box">
+                    <h5>Your Referral Link</h5>
+                    <div class="referral-link" id="referralLink">Loading...</div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="copyReferralLink()">
+                        <i class="bi bi-clipboard"></i> Copy Link
+                    </button>
+                </div>
+                <div class="d-flex justify-content-between mt-3">
+                    <button class="btn btn-outline-secondary" onclick="prevWizardStep()">Back</button>
+                    <button class="btn btn-primary" onclick="nextWizardStep()">Next</button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Complete -->
+            <div class="wizard-step" data-step="3">
+                <h4>All Set!</h4>
+                <p>Your account is now ready. You can start earning rewards by completing tasks or referring friends.</p>
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i> You've received a welcome bonus of $1.00!
+                </div>
+                <button class="btn btn-success w-100" onclick="finishWizard()">Go to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardPage" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-robot"></i> Telegram Bot</h4>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="menu-item active" data-section="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                <li><a href="#" class="menu-item" data-section="tasks"><i class="bi bi-list-task"></i> Tasks</a></li>
+                <li><a href="#" class="menu-item" data-section="referrals"><i class="bi bi-people"></i> Referrals</a></li>
+                <li><a href="#" class="menu-item" data-section="withdraw"><i class="bi bi-cash-stack"></i> Withdraw</a></li>
+                <li><a href="#" class="menu-item" data-section="history"><i class="bi bi-clock-history"></i> History</a></li>
+                <li><a href="#" class="menu-item" data-section="support"><i class="bi bi-headset"></i> Support</a></li>
+                <li><a href="#" class="menu-item" data-section="profile"><i class="bi bi-person"></i> Profile</a></li>
+                <li><a href="#" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Toggle Sidebar Button -->
+        <button class="toggle-sidebar" id="toggleSidebar">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="top-bar">
+                <h2 id="pageTitle">Dashboard</h2>
+                <div class="d-flex align-items-center">
+                    <span class="me-3">User: <strong id="userName">User</strong></span>
+                    <div class="user-avatar" id="userAvatar">U</div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active">
+                <div class="loading-spinner" id="dashboardLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-card">
+                            <i class="bi bi-wallet2"></i>
+                            <h3 id="userBalance">$0.00</h3>
+                            <p>Current Balance</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-card">
+                            <i class="bi bi-people-fill"></i>
+                            <h3 id="referralCount">0</h3>
+                            <p>Referrals</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="stat-card">
+                            <i class="bi bi-trophy-fill"></i>
+                            <h3 id="completedTasks">0</h3>
+                            <p>Completed Tasks</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Recent Transactions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentTransactions">
+                                    <!-- Transactions will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" onclick="showSection('tasks')">
+                                        <i class="bi bi-list-task"></i> View Tasks
+                                    </button>
+                                    <button class="btn btn-success" onclick="showSection('referrals')">
+                                        <i class="bi bi-people"></i> Referral Link
+                                    </button>
+                                    <button class="btn btn-warning" onclick="showSection('withdraw')">
+                                        <i class="bi bi-cash-stack"></i> Withdraw
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div id="tasks" class="content-section">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Available Tasks</h5>
+                        <button class="btn btn-primary" id="refreshTasks"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="tasksList">
+                            <!-- Tasks will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Referrals Section -->
+            <div id="referrals" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Referral System</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="referral-box">
+                            <h5>Your Referral Link</h5>
+                            <div class="referral-link" id="referralLinkMain">Loading...</div>
+                            <button class="btn btn-primary" onclick="copyReferralLink()">
+                                <i class="bi bi-clipboard"></i> Copy Link
+                            </button>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="stat-card">
+                                    <i class="bi bi-people-fill"></i>
+                                    <h3 id="totalReferrals">0</h3>
+                                    <p>Total Referrals</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-card">
+                                    <i class="bi bi-cash-stack"></i>
+                                    <h3 id="referralEarnings">$0.00</h3>
+                                    <p>Referral Earnings</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6>Referral List</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="referralsList">
+                                    <!-- Referrals will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Withdraw Section -->
+            <div id="withdraw" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Withdraw Funds</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Minimum withdrawal amount is $10.00
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="withdrawAmount">Amount</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="withdrawAmount" min="10" step="0.01">
+                                    </div>
+                                    <small class="form-text text-muted">Available balance: $<span id="availableBalance">0.00</span></small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="withdrawMethod">Withdrawal Method</label>
+                                    <select class="form-select" id="withdrawMethod">
+                                        <option value="">Select a method</option>
+                                        <option value="paypal">PayPal</option>
+                                        <option value="bank">Bank Transfer</option>
+                                        <option value="crypto">Cryptocurrency</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="withdrawalDetails" style="display: none;">
+                            <div class="form-group mb-3">
+                                <label for="withdrawalDetailsInput">Withdrawal Details</label>
+                                <textarea class="form-control" id="withdrawalDetailsInput" rows="3" placeholder="Enter your PayPal email, bank details, or crypto wallet address"></textarea>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="submitWithdrawal">Submit Withdrawal Request</button>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6>Withdrawal History</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="withdrawalHistory">
+                                    <!-- Withdrawal history will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div id="history" class="content-section">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Transaction History</h5>
+                        <div class="d-flex">
+                            <select class="form-select me-2" id="historyFilter">
+                                <option value="all">All Transactions</option>
+                                <option value="task">Task Rewards</option>
+                                <option value="referral">Referral Rewards</option>
+                                <option value="withdrawal">Withdrawals</option>
+                                <option value="bonus">Bonuses</option>
+                            </select>
+                            <button class="btn btn-primary" id="refreshHistory"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="transactionHistory">
+                            <!-- Transaction history will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Section -->
+            <div id="support" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Support</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> For general inquiries, please check our FAQ first. For account-specific issues, submit a support ticket.
+                        </div>
+                        
+                        <div class="accordion" id="faqAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingOne">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        How do I earn rewards?
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        You can earn rewards by completing tasks, referring friends, and participating in special events. Each task has a specific reward amount that will be added to your balance upon completion.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingTwo">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        How does the referral system work?
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        When someone signs up using your referral link, they become your referral. You'll earn a bonus reward for each referral, and additional rewards when they complete tasks.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingThree">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                        How long does withdrawal take?
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        Withdrawal requests are typically processed within 24-48 hours. You'll receive a notification when your withdrawal is approved.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6>Submit a Support Ticket</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="supportForm">
+                                    <div class="form-group mb-3">
+                                        <label for="supportSubject">Subject</label>
+                                        <input type="text" class="form-control" id="supportSubject" required>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="supportMessage">Message</label>
+                                        <textarea class="form-control" id="supportMessage" rows="5" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit Ticket</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Profile Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="profileTelegramId">Telegram ID</label>
+                                    <input type="text" class="form-control" id="profileTelegramId" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="profileUsername">Username</label>
+                                    <input type="text" class="form-control" id="profileUsername" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="profileJoined">Joined Date</label>
+                                    <input type="text" class="form-control" id="profileJoined" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="profileStatus">Account Status</label>
+                                    <input type="text" class="form-control" id="profileStatus" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="profileTotalEarned">Total Earned</label>
+                                    <input type="text" class="form-control" id="profileTotalEarned" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="profileTotalWithdrawn">Total Withdrawn</label>
+                                    <input type="text" class="form-control" id="profileTotalWithdrawn" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6>Preferences</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="emailNotifications">
+                                    <label class="form-check-label" for="emailNotifications">
+                                        Email Notifications
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="taskNotifications">
+                                    <label class="form-check-label" for="taskNotifications">
+                                        New Task Notifications
+                                    </label>
+                                </div>
+                                <button class="btn btn-primary" id="savePreferences">Save Preferences</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="taskModalTitle">Task Details</h5>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="taskModalContent">
+                    <!-- Task details will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="closeTaskModal">Close</button>
+                <button class="btn btn-primary" id="completeTaskBtn">Complete Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notificationMessage"></span>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select class="form-select" id="languageSelector">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="ru">Русский</option>
+        </select>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Firebase configuration - REPLACE WITH YOUR OWN CONFIG (same as admin panel)
+const firebaseConfig = {
+  apiKey: "AIzaSyAfPffF_C0AK9vsnYwuekJIOCPyvHDmSC4",
+  authDomain: "gg-arena-ee67f.firebaseapp.com",
+  databaseURL: "https://gg-arena-ee67f-default-rtdb.firebaseio.com",
+  projectId: "gg-arena-ee67f",
+  storageBucket: "gg-arena-ee67f.firebasestorage.app",
+  messagingSenderId: "621391687293",
+  appId: "1:621391687293:web:6893011fe3427917514b14"
+};
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const authPage = document.getElementById('authPage');
+        const startWizard = document.getElementById('startWizard');
+        const dashboardPage = document.getElementById('dashboardPage');
+        const authForm = document.getElementById('authForm');
+        const authTitle = document.getElementById('authTitle');
+        const authError = document.getElementById('authError');
+        const authErrorText = document.getElementById('authErrorText');
+        const authBtn = document.getElementById('authBtn');
+        const authToggle = document.getElementById('authToggle');
+        const authToggleText = document.getElementById('authToggleText');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordField = document.getElementById('passwordField');
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebar = document.getElementById('toggleSidebar');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const contentSections = document.querySelectorAll('.content-section');
+        const pageTitle = document.getElementById('pageTitle');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notificationMessage');
+        const taskModal = document.getElementById('taskModal');
+        const closeTaskModal = document.getElementById('closeTaskModal');
+        const completeTaskBtn = document.getElementById('completeTaskBtn');
+        const languageSelector = document.getElementById('languageSelector');
+
+        // Global variables
+        let currentUser = null;
+        let currentTaskId = null;
+        let isLoginMode = true;
+        let currentWizardStep = 1;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    // User is signed in
+                    currentUser = user;
+                    loadUserData(user.uid);
+                } else {
+                    // User is signed out
+                    showAuth();
+                }
+            });
+
+            // Event listeners
+            authForm.addEventListener('submit', handleAuth);
+            authToggle.addEventListener('click', toggleAuthMode);
+            togglePassword.addEventListener('click', togglePasswordVisibility);
+            toggleSidebar.addEventListener('click', toggleSidebarMenu);
+            logoutBtn.addEventListener('click', handleLogout);
+            closeTaskModal.addEventListener('click', () => taskModal.style.display = 'none');
+            completeTaskBtn.addEventListener('click', completeTask);
+            languageSelector.addEventListener('change', changeLanguage);
+
+            // Menu items
+            menuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (this.id !== 'logoutBtn') {
+                        e.preventDefault();
+                        const section = this.getAttribute('data-section');
+                        showSection(section);
+                    }
+                });
+            });
+
+            // Modal close buttons
+            document.querySelectorAll('.close-modal').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+
+            // Withdrawal method change
+            document.getElementById('withdrawMethod').addEventListener('change', function() {
+                const detailsField = document.getElementById('withdrawalDetails');
+                if (this.value) {
+                    detailsField.style.display = 'block';
+                } else {
+                    detailsField.style.display = 'none';
+                }
+            });
+
+            // Submit withdrawal
+            document.getElementById('submitWithdrawal').addEventListener('click', submitWithdrawal);
+
+            // Support form
+            document.getElementById('supportForm').addEventListener('submit', submitSupportTicket);
+
+            // Save preferences
+            document.getElementById('savePreferences').addEventListener('click', savePreferences);
+
+            // Refresh buttons
+            document.getElementById('refreshTasks').addEventListener('click', loadTasks);
+            document.getElementById('refreshHistory').addEventListener('click', loadTransactionHistory);
+
+            // History filter
+            document.getElementById('historyFilter').addEventListener('change', filterTransactionHistory);
+        });
+
+        // Toggle auth mode (login/register)
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+            
+            if (isLoginMode) {
+                authTitle.textContent = 'Login';
+                authToggleText.innerHTML = 'Don\'t have an account? <a href="#" id="authToggle">Register</a>';
+                document.getElementById('authBtn').querySelector('.btn-text').textContent = 'Login';
+                passwordField.style.display = 'none';
+            } else {
+                authTitle.textContent = 'Register';
+                authToggleText.innerHTML = 'Already have an account? <a href="#" id="authToggle">Login</a>';
+                document.getElementById('authBtn').querySelector('.btn-text').textContent = 'Register';
+                passwordField.style.display = 'block';
+            }
+            
+            // Re-attach event listener to the new toggle link
+            document.getElementById('authToggle').addEventListener('click', toggleAuthMode);
+        }
+
+        // Toggle password visibility
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const icon = togglePassword.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        // Show auth page
+        function showAuth() {
+            authPage.style.display = 'flex';
+            startWizard.style.display = 'none';
+            dashboardPage.style.display = 'none';
+            authError.style.display = 'none';
+        }
+
+        // Show dashboard
+        function showDashboard() {
+            authPage.style.display = 'none';
+            startWizard.style.display = 'none';
+            dashboardPage.style.display = 'block';
+        }
+
+        // Show start wizard
+        function showStartWizard() {
+            authPage.style.display = 'none';
+            startWizard.style.display = 'flex';
+            dashboardPage.style.display = 'none';
+            
+            // Reset wizard to first step
+            currentWizardStep = 1;
+            updateWizardSteps();
+        }
+
+        // Handle authentication (login/register)
+        function handleAuth(e) {
+            e.preventDefault();
+            
+            const telegramId = document.getElementById('telegramId').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            // Show loading state
+            authBtn.querySelector('.btn-text').textContent = isLoginMode ? 'Logging in...' : 'Registering...';
+            authBtn.querySelector('.spinner-border').classList.remove('d-none');
+            authBtn.disabled = true;
+            
+            if (isLoginMode) {
+                // Login mode - check if user exists in database
+                database.ref('users').orderByChild('telegramId').equalTo(telegramId).once('value')
+                    .then(snapshot => {
+                        if (snapshot.exists()) {
+                            // User exists, get the data
+                            const userData = snapshot.val();
+                            const userId = Object.keys(userData)[0];
+                            const user = userData[userId];
+                            
+                            // Create a custom token for authentication
+                            // In a real app, you would use Firebase Admin SDK to create custom tokens
+                            // For demo purposes, we'll use a simple approach
+                            localStorage.setItem('userToken', userId);
+                            localStorage.setItem('userName', username);
+                            
+                            if (rememberMe) {
+                                localStorage.setItem('rememberUser', 'true');
+                            }
+                            
+                            // Check if it's the first time login
+                            if (user.firstLogin) {
+                                // Mark as not first login anymore
+                                database.ref('users/' + userId).update({ firstLogin: false });
+                                showStartWizard();
+                            } else {
+                                showDashboard();
+                                loadUserData(userId);
+                            }
+                        } else {
+                            // User doesn't exist
+                            authError.style.display = 'block';
+                            authErrorText.textContent = 'User not found. Please register first.';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Login error:', error);
+                        authError.style.display = 'block';
+                        authErrorText.textContent = 'Login failed: ' + error.message;
+                    })
+                    .finally(() => {
+                        // Reset form
+                        authBtn.querySelector('.btn-text').textContent = 'Login';
+                        authBtn.querySelector('.spinner-border').classList.add('d-none');
+                        authBtn.disabled = false;
+                    });
+            } else {
+                // Register mode - create new user
+                const newUser = {
+                    telegramId: telegramId,
+                    username: username,
+                    password: password, // In a real app, you would hash this
+                    balance: 1.00, // Welcome bonus
+                    referralCount: 0,
+                    referralEarnings: 0,
+                    completedTasks: 0,
+                    totalEarned: 1.00,
+                    totalWithdrawn: 0,
+                    status: 'active',
+                    joinedDate: new Date().toISOString().split('T')[0],
+                    firstLogin: true,
+                    preferences: {
+                        emailNotifications: false,
+                        taskNotifications: true
+                    }
+                };
+                
+                database.ref('users').push(newUser)
+                    .then(() => {
+                        // User created successfully
+                        localStorage.setItem('userToken', newUser.telegramId);
+                        localStorage.setItem('userName', username);
+                        
+                        if (rememberMe) {
+                            localStorage.setItem('rememberUser', 'true');
+                        }
+                        
+                        showStartWizard();
+                    })
+                    .catch(error => {
+                        console.error('Registration error:', error);
+                        authError.style.display = 'block';
+                        authErrorText.textContent = 'Registration failed: ' + error.message;
+                    })
+                    .finally(() => {
+                        // Reset form
+                        authBtn.querySelector('.btn-text').textContent = 'Register';
+                        authBtn.querySelector('.spinner-border').classList.add('d-none');
+                        authBtn.disabled = false;
+                    });
+            }
+        }
+
+        // Handle logout
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('rememberUser');
+                showAuth();
+                showNotification('Logged out successfully!', 'success');
+            }
+        }
+
+        // Toggle sidebar menu
+        function toggleSidebarMenu() {
+            sidebar.classList.toggle('active');
+        }
+
+        // Show section
+        function showSection(sectionName) {
+            // Update menu items
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-section') === sectionName) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Update content sections
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionName).classList.add('active');
+
+            // Update page title
+            pageTitle.textContent = sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
+
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+            }
+
+            // Load section-specific data
+            if (sectionName === 'tasks') {
+                loadTasks();
+            } else if (sectionName === 'referrals') {
+                loadReferrals();
+            } else if (sectionName === 'withdraw') {
+                loadWithdrawalHistory();
+            } else if (sectionName === 'history') {
+                loadTransactionHistory();
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            notificationMessage.textContent = message;
+            notification.className = 'notification show';
+            if (type === 'error') {
+                notification.classList.add('error');
+            } else if (type === 'warning') {
+                notification.classList.add('warning');
+            }
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Load user data
+        function loadUserData(userId) {
+            // In a real app, userId would come from Firebase Auth
+            // For demo purposes, we'll use the telegramId from localStorage
+            const telegramId = localStorage.getItem('userToken') || userId;
+            const username = localStorage.getItem('userName');
+            
+            // Get user data from Firebase
+            database.ref('users').orderByChild('telegramId').equalTo(telegramId).once('value')
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        const userId = Object.keys(userData)[0];
+                        const user = userData[userId];
+                        
+                        // Update UI with user data
+                        document.getElementById('userName').textContent = user.username;
+                        document.getElementById('userAvatar').textContent = user.username.charAt(0).toUpperCase();
+                        document.getElementById('userBalance').textContent = '$' + (user.balance || 0).toFixed(2);
+                        document.getElementById('referralCount').textContent = user.referralCount || 0;
+                        document.getElementById('completedTasks').textContent = user.completedTasks || 0;
+                        
+                        // Load dashboard data
+                        loadDashboardData(userId);
+                        
+                        // Load profile data
+                        loadProfileData(user);
+                        
+                        // Store current user
+                        currentUser = {
+                            uid: userId,
+                            ...user
+                        };
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading user data:', error);
+                    showNotification('Error loading user data', 'error');
+                });
+        }
+
+        // Load dashboard data
+        function loadDashboardData(userId) {
+            // Show loading
+            document.getElementById('dashboardLoading').classList.add('show');
+            
+            // Get recent transactions
+            database.ref('transactions').orderByChild('userId').equalTo(userId).limitToLast(5).once('value')
+                .then(snapshot => {
+                    const transactions = snapshot.val() || {};
+                    const transactionsContainer = document.getElementById('recentTransactions');
+                    transactionsContainer.innerHTML = '';
+                    
+                    if (Object.keys(transactions).length === 0) {
+                        transactionsContainer.innerHTML = '<div class="empty-state"><i class="bi bi-clock-history"></i><p>No recent transactions</p></div>';
+                    } else {
+                        Object.values(transactions).reverse().forEach(transaction => {
+                            const transactionItem = document.createElement('div');
+                            transactionItem.className = 'transaction-item';
+                            transactionItem.innerHTML = `
+                                <div>
+                                    <strong>${transaction.type}</strong>
+                                    <div class="text-muted small">${new Date(transaction.timestamp).toLocaleDateString()}</div>
+                                </div>
+                                <div class="text-${transaction.amount > 0 ? 'success' : 'danger'}">
+                                    ${transaction.amount > 0 ? '+' : ''}$${transaction.amount.toFixed(2)}
+                                </div>
+                            `;
+                            transactionsContainer.appendChild(transactionItem);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading transactions:', error);
+                })
+                .finally(() => {
+                    // Hide loading
+                    document.getElementById('dashboardLoading').classList.remove('show');
+                });
+        }
+
+        // Load profile data
+        function loadProfileData(user) {
+            document.getElementById('profileTelegramId').value = user.telegramId;
+            document.getElementById('profileUsername').value = user.username;
+            document.getElementById('profileJoined').value = user.joinedDate;
+            document.getElementById('profileStatus').value = user.status;
+            document.getElementById('profileTotalEarned').value = '$' + (user.totalEarned || 0).toFixed(2);
+            document.getElementById('profileTotalWithdrawn').value = '$' + (user.totalWithdrawn || 0).toFixed(2);
+            
+            // Set preferences
+            document.getElementById('emailNotifications').checked = user.preferences?.emailNotifications || false;
+            document.getElementById('taskNotifications').checked = user.preferences?.taskNotifications || true;
+        }
+
+        // Save preferences
+        function savePreferences() {
+            const preferences = {
+                emailNotifications: document.getElementById('emailNotifications').checked,
+                taskNotifications: document.getElementById('taskNotifications').checked
+            };
+            
+            database.ref('users/' + currentUser.uid).update({
+                preferences: preferences
+            }).then(() => {
+                showNotification('Preferences saved successfully!', 'success');
+            }).catch(error => {
+                console.error('Error saving preferences:', error);
+                showNotification('Error saving preferences', 'error');
+            });
+        }
+
+        // Wizard functions
+        function nextWizardStep() {
+            if (currentWizardStep < 3) {
+                currentWizardStep++;
+                updateWizardSteps();
+                
+                // Load referral link on step 2
+                if (currentWizardStep === 2) {
+                    loadReferralLink();
+                }
+            }
+        }
+
+        function prevWizardStep() {
+            if (currentWizardStep > 1) {
+                currentWizardStep--;
+                updateWizardSteps();
+            }
+        }
+
+        function updateWizardSteps() {
+            // Update step visibility
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.classList.remove('active');
+                if (parseInt(step.getAttribute('data-step')) === currentWizardStep) {
+                    step.classList.add('active');
+                }
+            });
+            
+            // Update progress indicators
+            document.querySelectorAll('.progress-step').forEach(step => {
+                const stepNumber = parseInt(step.getAttribute('data-step'));
+                step.classList.remove('active', 'completed');
+                
+                if (stepNumber === currentWizardStep) {
+                    step.classList.add('active');
+                } else if (stepNumber < currentWizardStep) {
+                    step.classList.add('completed');
+                }
+            });
+        }
+
+        function loadReferralLink() {
+            const telegramId = localStorage.getItem('userToken');
+            const referralLink = `https://t.me/yourbot?start=${telegramId}`;
+            
+            document.getElementById('referralLink').textContent = referralLink;
+            document.getElementById('referralLinkMain').textContent = referralLink;
+        }
+
+        function copyReferralLink() {
+            const referralLink = document.getElementById('referralLink').textContent;
+            
+            // Create a temporary textarea to copy the text
+            const textarea = document.createElement('textarea');
+            textarea.value = referralLink;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            showNotification('Referral link copied to clipboard!', 'success');
+        }
+
+        function finishWizard() {
+            showDashboard();
+            showNotification('Welcome! Your account is now ready.', 'success');
+        }
+
+        // Load tasks
+        function loadTasks() {
+            database.ref('tasks').orderByChild('status').equalTo('active').once('value')
+                .then(snapshot => {
+                    const tasks = snapshot.val() || {};
+                    const tasksList = document.getElementById('tasksList');
+                    tasksList.innerHTML = '';
+                    
+                    if (Object.keys(tasks).length === 0) {
+                        tasksList.innerHTML = '<div class="empty-state"><i class="bi bi-list-task"></i><p>No tasks available at the moment</p></div>';
+                        return;
+                    }
+                    
+                    Object.entries(tasks).forEach(([taskId, task]) => {
+                        const taskCard = document.createElement('div');
+                        taskCard.className = 'task-card';
+                        taskCard.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5>${task.title}</h5>
+                                    <p>${task.description}</p>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-primary me-2">${task.type}</span>
+                                        <span class="reward">Reward: $${task.reward.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="viewTask('${taskId}')">
+                                    <i class="bi bi-eye"></i> View
+                                </button>
+                            </div>
+                        `;
+                        tasksList.appendChild(taskCard);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading tasks:', error);
+                    showNotification('Error loading tasks', 'error');
+                });
+        }
+
+        // View task details
+        function viewTask(taskId) {
+            currentTaskId = taskId;
+            
+            database.ref('tasks/' + taskId).once('value')
+                .then(snapshot => {
+                    const task = snapshot.val();
+                    if (!task) {
+                        showNotification('Task not found', 'error');
+                        return;
+                    }
+                    
+                    document.getElementById('taskModalTitle').textContent = task.title;
+                    document.getElementById('taskModalContent').innerHTML = `
+                        <p>${task.description}</p>
+                        <div class="mb-3">
+                            <strong>Task Type:</strong> ${task.type}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Reward:</strong> $${task.reward.toFixed(2)}
+                        </div>
+                        <div class="mb-3">
+                            <strong>Instructions:</strong>
+                            <ol>
+                                <li>Click the button below to open the task link</li>
+                                <li>Complete the required action</li>
+                                <li>Return to this page and click "Complete Task"</li>
+                            </ol>
+                        </div>
+                        <div class="mb-3">
+                            <a href="${task.link}" target="_blank" class="btn btn-outline-primary">
+                                <i class="bi bi-box-arrow-up-right"></i> Open Task Link
+                            </a>
+                        </div>
+                    `;
+                    
+                    taskModal.style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Error loading task details:', error);
+                    showNotification('Error loading task details', 'error');
+                });
+        }
+
+        // Complete task
+        function completeTask() {
+            if (!currentTaskId || !currentUser) {
+                showNotification('Invalid task or user not logged in', 'error');
+                return;
+            }
+            
+            // Get task details
+            database.ref('tasks/' + currentTaskId).once('value')
+                .then(snapshot => {
+                    const task = snapshot.val();
+                    if (!task) {
+                        showNotification('Task not found', 'error');
+                        return;
+                    }
+                    
+                    // Check if user has already completed this task
+                    return database.ref('userTasks').orderByChild('userId').equalTo(currentUser.uid).once('value')
+                        .then(userTasksSnapshot => {
+                            const userTasks = userTasksSnapshot.val() || {};
+                            const alreadyCompleted = Object.values(userTasks).some(
+                                userTask => userTask.taskId === currentTaskId && userTask.status === 'completed'
+                            );
+                            
+                            if (alreadyCompleted) {
+                                showNotification('You have already completed this task', 'warning');
+                                return;
+                            }
+                            
+                            // Mark task as completed
+                            const userTaskRef = database.ref('userTasks').push();
+                            const userTask = {
+                                userId: currentUser.uid,
+                                taskId: currentTaskId,
+                                status: 'completed',
+                                completedAt: new Date().toISOString()
+                            };
+                            
+                            return userTaskRef.set(userTask)
+                                .then(() => {
+                                    // Update user stats
+                                    return database.ref('users/' + currentUser.uid).transaction(user => {
+                                        if (user) {
+                                            user.balance = (user.balance || 0) + task.reward;
+                                            user.completedTasks = (user.completedTasks || 0) + 1;
+                                            user.totalEarned = (user.totalEarned || 0) + task.reward;
+                                        }
+                                        return user;
+                                    });
+                                })
+                                .then(() => {
+                                    // Add transaction record
+                                    const transaction = {
+                                        userId: currentUser.uid,
+                                        taskId: currentTaskId,
+                                        type: 'Task Reward',
+                                        amount: task.reward,
+                                        status: 'completed',
+                                        timestamp: new Date().toISOString()
+                                    };
+                                    
+                                    return database.ref('transactions').push(transaction);
+                                })
+                                .then(() => {
+                                    // Update task completion count
+                                    return database.ref('tasks/' + currentTaskId).transaction(task => {
+                                        if (task) {
+                                            task.completions = (task.completions || 0) + 1;
+                                        }
+                                        return task;
+                                    });
+                                })
+                                .then(() => {
+                                    // Log activity
+                                    const activity = {
+                                        user: currentUser.username,
+                                        action: `Completed task: ${task.title}`,
+                                        timestamp: new Date().toISOString()
+                                    };
+                                    
+                                    return database.ref('activities').push(activity);
+                                })
+                                .then(() => {
+                                    showNotification(`Task completed! You earned $${task.reward.toFixed(2)}`, 'success');
+                                    taskModal.style.display = 'none';
+                                    
+                                    // Refresh user data and tasks
+                                    loadUserData(currentUser.uid);
+                                    loadTasks();
+                                });
+                        });
+                })
+                .catch(error => {
+                    console.error('Error completing task:', error);
+                    showNotification('Error completing task', 'error');
+                });
+        }
+
+        // Load referrals
+        function loadReferrals() {
+            // Load referral link
+            loadReferralLink();
+            
+            // Load referral stats
+            document.getElementById('totalReferrals').textContent = currentUser.referralCount || 0;
+            document.getElementById('referralEarnings').textContent = '$' + (currentUser.referralEarnings || 0).toFixed(2);
+            
+            // Load referral list
+            database.ref('users').orderByChild('referredBy').equalTo(currentUser.telegramId).once('value')
+                .then(snapshot => {
+                    const referrals = snapshot.val() || {};
+                    const referralsList = document.getElementById('referralsList');
+                    referralsList.innerHTML = '';
+                    
+                    if (Object.keys(referrals).length === 0) {
+                        referralsList.innerHTML = '<div class="empty-state"><i class="bi bi-people"></i><p>No referrals yet</p></div>';
+                        return;
+                    }
+                    
+                    Object.values(referrals).forEach(referral => {
+                        const referralItem = document.createElement('div');
+                        referralItem.className = 'transaction-item';
+                        referralItem.innerHTML = `
+                            <div>
+                                <strong>${referral.username}</strong>
+                                <div class="text-muted small">Joined: ${referral.joinedDate}</div>
+                            </div>
+                            <div class="text-success">
+                                $2.50
+                            </div>
+                        `;
+                        referralsList.appendChild(referralItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading referrals:', error);
+                    showNotification('Error loading referrals', 'error');
+                });
+        }
+
+        // Load withdrawal history
+        function loadWithdrawalHistory() {
+            document.getElementById('availableBalance').textContent = (currentUser.balance || 0).toFixed(2);
+            
+            database.ref('withdrawals').orderByChild('userId').equalTo(currentUser.uid).once('value')
+                .then(snapshot => {
+                    const withdrawals = snapshot.val() || {};
+                    const withdrawalHistory = document.getElementById('withdrawalHistory');
+                    withdrawalHistory.innerHTML = '';
+                    
+                    if (Object.keys(withdrawals).length === 0) {
+                        withdrawalHistory.innerHTML = '<div class="empty-state"><i class="bi bi-cash-stack"></i><p>No withdrawal history</p></div>';
+                        return;
+                    }
+                    
+                    Object.values(withdrawals).reverse().forEach(withdrawal => {
+                        const withdrawalItem = document.createElement('div');
+                        withdrawalItem.className = 'transaction-item';
+                        withdrawalItem.innerHTML = `
+                            <div>
+                                <strong>${withdrawal.method}</strong>
+                                <div class="text-muted small">${new Date(withdrawal.timestamp).toLocaleDateString()}</div>
+                            </div>
+                            <div>
+                                <span class="status-badge ${withdrawal.status}">${withdrawal.status}</span>
+                                <div class="text-danger">-$${withdrawal.amount.toFixed(2)}</div>
+                            </div>
+                        `;
+                        withdrawalHistory.appendChild(withdrawalItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading withdrawal history:', error);
+                    showNotification('Error loading withdrawal history', 'error');
+                });
+        }
+
+        // Submit withdrawal
+        function submitWithdrawal() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const method = document.getElementById('withdrawMethod').value;
+            const details = document.getElementById('withdrawalDetailsInput').value;
+            
+            if (!amount || !method || !details) {
+                showNotification('Please fill in all fields', 'warning');
+                return;
+            }
+            
+            if (amount < 10) {
+                showNotification('Minimum withdrawal amount is $10.00', 'warning');
+                return;
+            }
+            
+            if (amount > currentUser.balance) {
+                showNotification('Insufficient balance', 'warning');
+                return;
+            }
+            
+            // Create withdrawal request
+            const withdrawal = {
+                userId: currentUser.uid,
+                telegramId: currentUser.telegramId,
+                username: currentUser.username,
+                amount: amount,
+                method: method,
+                details: details,
+                status: 'pending',
+                timestamp: new Date().toISOString()
+            };
+            
+            database.ref('withdrawals').push(withdrawal)
+                .then(() => {
+                    // Update user balance
+                    return database.ref('users/' + currentUser.uid).transaction(user => {
+                        if (user) {
+                            user.balance = (user.balance || 0) - amount;
+                            user.totalWithdrawn = (user.totalWithdrawn || 0) + amount;
+                        }
+                        return user;
+                    });
+                })
+                .then(() => {
+                    // Add transaction record
+                    const transaction = {
+                        userId: currentUser.uid,
+                        type: 'Withdrawal',
+                        amount: -amount,
+                        status: 'pending',
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    return database.ref('transactions').push(transaction);
+                })
+                .then(() => {
+                    // Log activity
+                    const activity = {
+                        user: currentUser.username,
+                        action: `Requested withdrawal of $${amount.toFixed(2)}`,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    return database.ref('activities').push(activity);
+                })
+                .then(() => {
+                    showNotification('Withdrawal request submitted successfully!', 'success');
+                    
+                    // Reset form
+                    document.getElementById('withdrawAmount').value = '';
+                    document.getElementById('withdrawMethod').value = '';
+                    document.getElementById('withdrawalDetailsInput').value = '';
+                    document.getElementById('withdrawalDetails').style.display = 'none';
+                    
+                    // Refresh data
+                    loadUserData(currentUser.uid);
+                    loadWithdrawalHistory();
+                })
+                .catch(error => {
+                    console.error('Error submitting withdrawal:', error);
+                    showNotification('Error submitting withdrawal request', 'error');
+                });
+        }
+
+        // Load transaction history
+        function loadTransactionHistory() {
+            database.ref('transactions').orderByChild('userId').equalTo(currentUser.uid).once('value')
+                .then(snapshot => {
+                    const transactions = snapshot.val() || {};
+                    const transactionHistory = document.getElementById('transactionHistory');
+                    transactionHistory.innerHTML = '';
+                    
+                    if (Object.keys(transactions).length === 0) {
+                        transactionHistory.innerHTML = '<div class="empty-state"><i class="bi bi-clock-history"></i><p>No transaction history</p></div>';
+                        return;
+                    }
+                    
+                    Object.values(transactions).reverse().forEach(transaction => {
+                        const transactionItem = document.createElement('div');
+                        transactionItem.className = 'transaction-item';
+                        transactionItem.setAttribute('data-type', transaction.type.toLowerCase());
+                        transactionItem.innerHTML = `
+                            <div>
+                                <strong>${transaction.type}</strong>
+                                <div class="text-muted small">${new Date(transaction.timestamp).toLocaleDateString()}</div>
+                            </div>
+                            <div class="text-${transaction.amount > 0 ? 'success' : 'danger'}">
+                                ${transaction.amount > 0 ? '+' : ''}$${transaction.amount.toFixed(2)}
+                            </div>
+                        `;
+                        transactionHistory.appendChild(transactionItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading transaction history:', error);
+                    showNotification('Error loading transaction history', 'error');
+                });
+        }
+
+        // Filter transaction history
+        function filterTransactionHistory() {
+            const filterValue = document.getElementById('historyFilter').value;
+            const transactionItems = document.querySelectorAll('#transactionHistory .transaction-item');
+            
+            transactionItems.forEach(item => {
+                if (filterValue === 'all') {
+                    item.style.display = 'flex';
+                } else {
+                    const type = item.getAttribute('data-type');
+                    if (type && type.includes(filterValue)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Submit support ticket
+        function submitSupportTicket(e) {
+            e.preventDefault();
+            
+            const subject = document.getElementById('supportSubject').value;
+            const message = document.getElementById('supportMessage').value;
+            
+            if (!subject || !message) {
+                showNotification('Please fill in all fields', 'warning');
+                return;
+            }
+            
+            // Create support ticket
+            const ticket = {
+                userId: currentUser.uid,
+                telegramId: currentUser.telegramId,
+                username: currentUser.username,
+                subject: subject,
+                message: message,
+                status: 'open',
+                timestamp: new Date().toISOString()
+            };
+            
+            database.ref('supportTickets').push(ticket)
+                .then(() => {
+                    showNotification('Support ticket submitted successfully!', 'success');
+                    
+                    // Reset form
+                    document.getElementById('supportSubject').value = '';
+                    document.getElementById('supportMessage').value = '';
+                })
+                .catch(error => {
+                    console.error('Error submitting support ticket:', error);
+                    showNotification('Error submitting support ticket', 'error');
+                });
+        }
+
+        // Change language
+        function changeLanguage() {
+            const language = languageSelector.value;
+            
+            // In a real app, you would load language files and update UI
+            // For demo purposes, we'll just show a notification
+            showNotification(`Language changed to ${language}`, 'success');
+        }
+    </script>
+</body>
+</html>
